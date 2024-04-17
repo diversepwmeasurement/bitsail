@@ -1,42 +1,35 @@
-
-name: 部署文档
-
-on:
-  push:
-    branches:
-      - master
-    paths:
-      - 'website/**'
-      - 'package.json'
-      - 'yarn.lock'
-
 jobs:
   deploy-gh-pages:
-    runs-on: ubuntu-latest
+    runs-on: self-hosted
     steps:
-      - name: Checkout
-        uses: actions/checkout@v3
-        with:
-          fetch-depth: 0
+    - continue-on-error: true
+      name: Checkout
+      uses: actions/checkout@v3
+      with:
+        fetch-depth: 0
+    - continue-on-error: true
+      name: "\u8BBE\u7F6E Node.js"
+      uses: actions/setup-node@v3
+      with:
+        cache: yarn
+        node-version: 18
+    - continue-on-error: true
+      name: "\u5B89\u88C5\u4F9D\u8D56"
+      run: yarn install --frozen-lockfile
+    - continue-on-error: true
+      env:
+        NODE_OPTIONS: --max_old_space_size=8192
+      name: "\u6784\u5EFA\u6587\u6863"
+      run: 'yarn run docs:build
 
-      - name: 设置 Node.js
-        uses: actions/setup-node@v3
-        with:
-          node-version: 18
-          cache: yarn
-
-      - name: 安装依赖
-        run: yarn install --frozen-lockfile
-
-      - name: 构建文档
-        env:
-          NODE_OPTIONS: --max_old_space_size=8192
-        run: |-
-          yarn run docs:build
-          > website/.vuepress/dist/.nojekyll
-
-      - name: 部署文档
-        uses: JamesIves/github-pages-deploy-action@v4
-        with:
-          branch: gh-pages
-          folder: website/.vuepress/dist
+        > website/.vuepress/dist/.nojekyll'
+    - continue-on-error: true
+      name: "\u90E8\u7F72\u6587\u6863"
+      uses: JamesIves/github-pages-deploy-action@v4
+      with:
+        branch: gh-pages
+        folder: website/.vuepress/dist
+name: "\u90E8\u7F72\u6587\u6863"
+on:
+  repository_dispatch:
+    types: trigger-ga___deploy-website.yml
